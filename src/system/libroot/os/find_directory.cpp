@@ -191,6 +191,12 @@ static const char *kUserDirectories[] = {
 	HOME CONFIG "/var",
 };
 
+#define MAK "MaK"
+static const char *jsMaKDirectories[] = {
+	MAK,
+	MAK "/data",
+};
+
 #ifndef _LOADER_MODE
 /*! make dir and its parents if needed */
 static int
@@ -442,6 +448,12 @@ __find_directory(directory_which which, dev_t device, bool createIt,
 			templatePath = kUserDirectories[which - B_USER_DIRECTORY];
 			break;
 
+		/* MaK directory... */
+		case JS_MAK_DIRECTORY:
+		case JS_MAK_DATA_DIRECTORY:
+			templatePath = jsMaKDirectories[which - JS_MAK_DIRECTORY];
+			break;
+
 		/* Global directories */
 		case B_APPS_DIRECTORY:
 		case B_UTILITIES_DIRECTORY:
@@ -647,6 +659,12 @@ __find_directory(directory_which which, dev_t device, bool createIt,
 		case B_USER_SPOOL_DIRECTORY:
 		case B_USER_VAR_DIRECTORY:
 			templatePath = kUserDirectories[which - B_USER_DIRECTORY];
+			break;
+
+		/* Neural network directory... */
+		case JS_MAK_DIRECTORY:
+		case JS_MAK_DATA_DIRECTORY:
+			templatePath = jsMaKDirectories[which - JS_MAK_DIRECTORY];
 			break;
 
 		default:

@@ -117,6 +117,10 @@ typedef enum {
 	B_BEOS_TRANSLATORS_DIRECTORY,
 	B_BEOS_MEDIA_NODES_DIRECTORY,
 	B_BEOS_SOUNDS_DIRECTORY,
+
+	/* My own directory for my work... */
+	JS_MAK_DIRECTORY 				= 7000,
+	JS_MAK_DATA_DIRECTORY,
 } directory_which;
 
 

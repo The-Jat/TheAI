@@ -641,10 +641,10 @@ debug_printf("hello hi , i m nn , born right now...\n");
 
 debug_printf("hello hi , i m nn , adult...\n");
 	BPath path;
-	/*error = find_directory(JS_MAK_DIRECTORY, &path, true);
+	error = find_directory(JS_MAK_DIRECTORY, &path, true);
 	if (error != B_OK)
 		debug_printf("failed in creation MaK directory.\n");
-*/
+
 //testing wren it works man
 /*debug_printf("wren testing.....\n");
  WrenConfiguration config;
