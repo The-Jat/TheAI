@@ -116,6 +116,7 @@ SYSTEM_SERVERS = [ FFilterByBuildFeatures
 	keystore_server
 	launch_daemon
 	mount_server
+	nn
 	net_server notification_server
 	package_daemon power_daemon
 	registrar

@@ -60,6 +60,10 @@ target desktop {
 		}
 		launch /bin/ln -sf /boot/system/apps/Installer ~/Desktop/Installer
 	}
+
+	service x-vnd.Haiku-nn {
+		launch /system/servers/nn
+	}
 }
 
 target first_boot {

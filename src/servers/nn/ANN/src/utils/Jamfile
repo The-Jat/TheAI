@@ -1,0 +1,10 @@
+SubDir HAIKU_TOP src servers nn ANN src utils ;
+
+local sources =
+	Math.cpp
+	Misc.cpp
+	;
+
+StaticLibrary libANN_utils.a :
+	$(sources)
+	;

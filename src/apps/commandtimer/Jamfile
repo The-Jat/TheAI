@@ -1,0 +1,19 @@
+SubDir HAIKU_TOP src apps commandtimer ;
+
+UsePrivateHeaders app interface libroot shared ;
+
+Application CommandTimer :
+	CommandTimer.cpp
+	CommandTimerApp.cpp
+	CommandTimerWindow.cpp
+	: [ TargetLibstdc++ ] be localestub tracker
+	: CommandTimer.rdef
+;
+
+DoCatalogs CommandTimer :
+	x-vnd.jas.CommandTimer
+	:
+	CommandTimer.cpp
+	CommandTimerApp.cpp
+	CommandTimerWindow.cpp
+;

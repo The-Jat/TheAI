@@ -49,6 +49,9 @@ AddDirectoryToHaikuImage system var log ;
 AddDirectoryToHaikuImage trash : trash.rdef ;
 
 
+# my own directory for needy things
+AddDirectoryToHaikuImage home MaK ;
+
 #pragma mark - Optional Packages
 
 

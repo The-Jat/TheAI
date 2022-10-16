@@ -1,0 +1,17 @@
+SubDir HAIKU_TOP src servers nn ANN src neural_network ;
+
+
+
+local sources =
+	backPropagation.cpp
+	constructor.cpp
+	feedForward.cpp
+	loadWeights.cpp
+	NeuralNetwork.cpp
+	setErrors.cpp
+	train.cpp ;
+
+StaticLibrary libANN_neural_network.a :
+	$(sources)
+	;
+	

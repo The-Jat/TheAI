@@ -18,6 +18,7 @@ SYSTEM_BIN += [ FFilterByBuildFeatures
 SYSTEM_APPS += [ FFilterByBuildFeatures
 	ActivityMonitor AutoRaise
 	CodyCam
+	CommandTimer
 	GLInfo@mesa
 	HaikuDepot
 	Icon-O-Matic@expat Installer LaunchBox LegacyPackageInstaller

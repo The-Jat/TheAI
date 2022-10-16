@@ -1,0 +1,87 @@
+SubDir HAIKU_TOP src servers nn ;
+# SubDir HAIKU_TOP src servers nn neural_network ;
+
+UsePrivateHeaders app ;
+UsePrivateHeaders debug ;
+UsePrivateHeaders kernel ;
+UsePrivateHeaders shared ;
+UsePrivateHeaders storage ;
+
+# UseHeaders [ FDirName $(HAIKU_TOP) headers beyond ] : true ;
+# UseHeaders [ FDirName $(HAIKU_TOP) headers functions ] : true ;
+
+# UseHeaders [ FDirName $(HAIKU_TOP) head libs ] : true ;
+# UseHeaders [ FDirName $(HAIKU_TOP) head ] : true ;
+
+# UseHeaders [ FDirName $(HAIKU_TOP) head js_libs ] : true ;
+
+# UseHeaders [ FDirName $(HAIKU_TOP) src js_libs ] : true ;
+
+# wren
+UseHeaders [ FDirName $(HAIKU_TOP) src js_libs wren src include ] : true ;
+
+UsePrivateHeaders NN ;
+
+AddResources nn : nn_server.rdef ;
+
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) data_set ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) mathematical_model ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) model_selection ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) neural_network ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) performance_functional ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) testing_analysis ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) training_strategy ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) utilities ] ;
+
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) MiniDNN ] ;
+
+# wren
+SEARCH_SOURCE += [ FDirName $(SUBDIR) src ] ;
+SEARCH_SOURCE += [ FDirName $(SUBDIR) src optional ] ;
+SEARCH_SOURCE += [ FDirName $(SUBDIR) src vm ] ;
+
+# rust code
+# SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) ] ;
+
+# ANN
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) ANN src ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) ANN src neural_network ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) ANN src utils ] ;
+
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) asmjit core ] ;
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) asmjit x86 ] ;
+
+# SEARCH_SOURCE += [ FDirName $(SUBDIR) mylib ] ;
+
+Server nn
+ 	:
+	
+	
+ 	# array_view_test.cpp
+	# SimplePair.cpp
+	DPath.cpp
+ 	nnServer.cpp
+	nnWindow.cpp
+	# SimplePair.cpp
+	## nn.cpp
+	
+	
+	
+	
+	:
+	be
+	libdebug.so
+	shared
+	[ TargetLibstdc++ ]
+	localestub
+	# wren.a # from the js_libs
+;
+
+DoCatalogs nn :
+	x-vnd.Haiku-nn
+	:
+	nnServer.cpp
+	nnWindow.cpp
+;
+
+# SubInclude HAIKU_TOP src servers nn ANN ;

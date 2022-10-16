@@ -20,7 +20,8 @@ for architectureObject in [ MultiArchSubDirSetup ] {
 # Include required packages:
 # primary architecture
 AddHaikuImageSystemPackages [ FFilterByBuildFeatures
-	bash bc freetype libsolv zlib
+	# bash bc freetype libsolv zlib
+	autoconf automake bash bc cdrtools curl_devel coreutils binutils bison flex gcc gmp jam libjpeg_turbo_devel libpng16_devel make mkdepend m4 mpc mpfr nasm nghttp2_devel openssl_devel patch pkgconfig texinfo zlib_devel curl freetype libsolv zlib zstd
 
 	!gcc2 @{ coreutils icu66 }@
 	gcc2 @{ coreutils_x86 icu icu66_x86@secondary_x86 }@

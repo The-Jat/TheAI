@@ -1,0 +1,17 @@
+SubDir HAIKU_TOP src servers nn ANN src ;
+
+local sources =
+	Layer.cpp
+	Matrix.cpp
+	Neuron.cpp
+	train.cpp ;
+
+StaticLibrary libANN.a :
+	$(sources)
+	:
+	libANN_utils.a
+	libANN_neural_network.a
+	;
+
+SubInclude HAIKU_TOP src servers nn ANN src neural_network ;
+SubInclude HAIKU_TOP src servers nn ANN src utils ;
