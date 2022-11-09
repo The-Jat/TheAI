@@ -43,6 +43,7 @@
 
 // command pipe include
 #include <private/shared/CommandPipe.h>
+#include <msg.h>
 
 class DPath;
 class BFile;
@@ -556,6 +557,47 @@ entry_ref reff2 = CreateSourceFile("/","any2.cpp", true);
 
 debug_printf("after launching the terminal...\n");
 
+int delay=0;
+while(delay<99999999){
+delay++;
+}
+// running the code start
+// it is executed at /boot/home
+BString	fCommand = "a.out";//"pwd"; //"/bin/bash -c ./a.out";
+	debug_printf("fCommand %s\n", fCommand.String());
+	FILE* fd = popen(fCommand.String(),"r");
+	if (fd != NULL) {
+	debug_printf("got something\n");
+		BString data;
+		char buffer[4096];
+		while (fgets(buffer,4096,fd)) {
+			if (!ferror(fd)) {
+				data += buffer;
+			}
+		}
+
+		int status = pclose(fd);
+		if (0 != status) {
+				debug_printf("popen returned non zero (error) code: %i",status);
+			}
+
+		debug_printf("output of the command %s",data.String());
+	}
+// code ended
+
+// trying to pass msg and run command timer
+	debug_printf("command timer launch starts \n");
+	//BMessage commandMsg('DRCT');//(kMsgCompile);
+	BMessage commandMsg(kmsg);
+	//commandMsg.what = 'DRCT';
+	
+	const char* cmndArgs[] = { "-r", "a.out", NULL};
+	const char* kCommandTimerSignature = "application/x-vnd.jas.CommandTimer";
+	be_roster->Launch(kCommandTimerSignature, 2, cmndArgs);
+
+	//be_roster->Launch(kCommandTimerSignature, &commandMsg);
+	
+	debug_printf("Command timer launched\n");
 
 
 	

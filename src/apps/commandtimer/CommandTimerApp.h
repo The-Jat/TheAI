@@ -17,9 +17,12 @@ class CommandTimerApp : public BApplication
 {
 public:
 	CommandTimerApp();
+	virtual void ArgvReceived(int32 argc, char** argv);
+
 
 private:
 	CommandTimerWindow* cTWindow;
+	 const char* fCommand;
 };
 
 #endif

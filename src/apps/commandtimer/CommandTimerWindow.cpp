@@ -18,7 +18,7 @@
 #include <Path.h>
 #include <Resources.h>
 #include <SeparatorView.h>
-
+#include <msg.h>
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "TimerWindow"
 
@@ -29,11 +29,17 @@
 //#endif
 
 
-CommandTimerWindow::CommandTimerWindow(BRect cTWindowRect)
+CommandTimerWindow::CommandTimerWindow(BRect cTWindowRect,const char* argv)
 	:
 	BWindow(cTWindowRect, B_TRANSLATE_SYSTEM_NAME("CommandTimer"), B_TITLED_WINDOW,
 		B_AUTO_UPDATE_SIZE_LIMITS | B_NOT_V_RESIZABLE | B_NOT_ZOOMABLE)
 {
+debug_printf("CommandTimerWindow {constructor}\n");
+//debug_printf("CommandTimerWindow {constructor} string is %s\n", *argv);
+debug_printf("CommandTimerWindow {constructor} string is non ptr %s\n", argv);
+//if (*command ) {
+//	debug_printf("CommandTimerWindow {constructor} command is not null\n");
+//}
 	// TextControls
 	commandTextControl = new BTextControl(
 		"commandTextControl", B_TRANSLATE("Command:"), NULL, NULL);
@@ -151,10 +157,58 @@ CommandTimerWindow::MessageReceived(BMessage* cTMessage)
 {
 
 debug_printf("CommandTimerWindow:: MessageReceived\n");
+debug_printf("CommandTimerWindow:: MessageReceived what = %d\n", cTMessage->what);
+debug_printf("CommandTimerWindow:: MessageReceived ExecuteOrNot %d\n", ExecuteOrNot);
+if(ExecuteOrNot == true){
+	ExecuteOrNot = false;
+	
+	BString	fCommand = "a.out";//"pwd"; //"/bin/bash -c ./a.out";
+	debug_printf("fCommand %s\n", fCommand.String());
+	FILE* fd = popen(fCommand.String(),"r");
+	if (fd != NULL) {
+	debug_printf("got something\n");
+		BString data;
+		char buffer[4096];
+		while (fgets(buffer,4096,fd)) {
+			if (!ferror(fd)) {
+				data += buffer;
+			}
+		}
+
+		int status = pclose(fd);
+		if (0 != status) {
+				debug_printf("popen returned non zero (error) code: %i",status);
+			}
+
+		debug_printf("output of the command %s",data.String());
+	}
+	
+	
+}
 //executeCompileCommand();
 //debug_printf("CommandTimerWindow:: MessageReceived command executed\n");
+/*BString	fCommand = "a.out";//"pwd"; //"/bin/bash -c ./a.out";
+	debug_printf("fCommand %s\n", fCommand.String());
+	FILE* fd = popen(fCommand.String(),"r");
+	if (fd != NULL) {
+	debug_printf("got something\n");
+		BString data;
+		char buffer[4096];
+		while (fgets(buffer,4096,fd)) {
+			if (!ferror(fd)) {
+				data += buffer;
+			}
+		}
+
+		int status = pclose(fd);
+		if (0 != status) {
+				debug_printf("popen returned non zero (error) code: %i",status);
+			}
+
+		debug_printf("output of the command %s",data.String());
+}*/
 	switch (cTMessage->what) {
-		case 'DRCT':
+		case kmsg:
 			debug_printf("CommandTimerWindow:: MessageReceived DRCT\n");
 			executeCompileCommand();
 			break;

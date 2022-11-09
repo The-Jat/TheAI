@@ -28,7 +28,7 @@ enum panelMode {
 class CommandTimerWindow : public BWindow
 {
 public:
-	CommandTimerWindow(BRect cTWindowRect);
+	CommandTimerWindow(BRect cTWindowRect, const char* argv);
 
 	virtual void MessageReceived(BMessage* cTMessage);
 	virtual bool QuitRequested();
@@ -68,6 +68,8 @@ private:
 	BMessageRunner* runner;
 	panelMode	mode;
 	BFilePanel*	choosePanel;
+	
+	bool ExecuteOrNot = true;
 };
 
 #endif
