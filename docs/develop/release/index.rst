@@ -51,4 +51,3 @@ to drive Haiku towards this release date.
 
 Release dates can slide, it's ok.
 We just try to slide pragmatically (+1 week because of X,Y,Z)
-
