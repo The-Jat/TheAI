@@ -65,9 +65,15 @@ debug_printf("CommandTimerWindow {constructor} string is non ptr %s\n", argv);
 	// Buttons
 	startStopButton = new BButton(
 		"startStopButton", B_TRANSLATE("Start"), new BMessage('CLOK'));
-	startStopButton->SetEnabled(false);
+	startStopButton->SetEnabled(true);//false);
 	startStopButton->SetExplicitMaxSize(
 		BSize(B_SIZE_UNLIMITED, B_SIZE_UNLIMITED));
+	
+	/*BButton Communicate = new BButton(
+		"communicateButton", B_Translate("Communicate"), new BMessage('CMNC'));
+	Communicate->SetEnabled(true);
+	COmmunicate->SetExplicitMaxSize(
+		BSize(B_SIZE_UNLIMITED, B_SIZE_UNLIMITED));*/
 
 	chooseCommandButton = new BButton(NULL, new BMessage('CHCB'));
 	choosePathButton = new BButton(NULL, new BMessage('CHPB'));
@@ -220,8 +226,24 @@ if(ExecuteOrNot == true){
 				commandTextControl->TextLength() == 0 ? false : true);
 			break;
 		case 'CLOK':
-			startStopClock();
+		{
+			//startStopClock();
+			debug_printf("received CLOK message \n");
+			int32 messageCode = 77;
+			//const void* message = "seven";
+			char message[100]={"seven"};
+			//int32 messageSize = 8;
+			port_id nnPort = find_port("neural listener");
+			//status_t result = write_port( nnPort, 0x7777, data, 20);
+			status_t result = write_port( nnPort, messageCode, message, sizeof(message));
+			if(result == B_OK){
+				debug_printf("status_t = B_OK \n");
+			}else{
+				debug_printf("CommandTimerWindow = error writing to port.\n");
+			}
 			break;
+		}
+			
 		case 'REPT':
 			toggleRepeat();
 			break;

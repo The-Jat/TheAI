@@ -53,9 +53,11 @@ SEARCH_SOURCE += [ FDirName $(SUBDIR) src vm ] ;
 
 # SEARCH_SOURCE += [ FDirName $(SUBDIR) mylib ] ;
 
+SEARCH_SOURCE += [ FDirName $(SUBDIR) file ] ;
+
 Server nn
  	:
-	
+	TextFile.cpp
 	
  	# array_view_test.cpp
 	# SimplePair.cpp

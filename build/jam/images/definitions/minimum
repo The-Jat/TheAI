@@ -288,6 +288,11 @@ SEARCH on $(networkSettingsFiles)
 	= [ FDirName $(HAIKU_TOP) data settings network ] ;
 AddFilesToHaikuImage system settings network : $(networkSettingsFiles) ;
 
+# AI file
+SEARCH on $(NNFiles)
+	= [ FDirName $(HAIKU_TOP) data neural ] ;
+AddFilesToHaikuImage MaK : $(NNFiles) ;
+
 # repository config and cache files
 local repository ;
 for repository in $(HAIKU_REPOSITORIES) {

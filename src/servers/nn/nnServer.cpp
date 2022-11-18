@@ -59,6 +59,8 @@ static const int32 MSG_DEBUG_THIS_TEAM = 'dbtt';
 #	define TRACE(x) ;
 #endif
 
+#include "queue.h"
+#include "file/TextFile.h"
 
 using std::map;
 using std::nothrow;
@@ -106,6 +108,25 @@ NN::NN(status_t &error)
 {
 }
 
+
+class DebugMessage : public DoublyLinkedListLinkImpl<DebugMessage> {
+public:
+	DebugMessage()
+	{
+	}
+
+	void SetCode(debug_debugger_message code)		{ fCode = code; }
+	debug_debugger_message Code() const				{ return fCode; }
+
+	debug_debugger_message_data &Data()				{ return fData; }
+	const debug_debugger_message_data &Data() const	{ return fData; }
+
+private:
+	debug_debugger_message		fCode;
+	debug_debugger_message_data	fData;
+};
+
+typedef DoublyLinkedList<DebugMessage>	DebugMessageList;
 
 typedef int (*Func)(void);
 //testing wren
@@ -266,6 +287,7 @@ enum
 {
 	SOURCEFILE_PAIR = 0x00000001	// Create a source file and a partner file, if appropriate
 };
+
 entry_ref
 MakeProjectFile (DPath folder, const char *name, const char *data = NULL, const char *type =NULL)
 {
@@ -405,11 +427,68 @@ CreateSourceFile(const char *dir, const char *name, uint32 options, BString data
 	return is_cpp ? sourceRef : headerRef;
 }
 
+
+void pushWordsToQueue(string input, Queue<string> &q){
+	long unsigned int i = 0;
+	string words;
+	
+	while(i != input.length()){
+	
+		if(input[i] == ' ' || input[i] == '!' || input[i] == '.' || input[i] == '?')
+		{
+			q.enQueue(words);
+			words.clear();
+		} else
+		{
+			words = words + input[i];
+		}
+		
+		i++;
+	}
+}
+
 static const uint32 kMsgCompile = 'DRCT';
 status_t
 NN::Init()
 {
 	debug_printf("NN::Init\n");
+	
+	debug_printf("NN::Init creating listener port\n");
+	// create listener port
+	fListenerPort = create_port(10, "neural listener");
+	if (fListenerPort < 0)
+		return fListenerPort;
+
+	// spawn the listener thread
+	fListener = spawn_thread(_ListenerEntry, "neural listener",
+		B_NORMAL_PRIORITY, this);
+	if (fListener < 0)
+		return fListener;
+
+	// resume the listener
+	resume_thread(fListener);
+	
+	
+	debug_printf("Queue started \n");
+	
+	Queue<string> input;
+	string ip_sentence;
+	ip_sentence = "create a program to output 5.";
+	
+	pushWordsToQueue(ip_sentence, input);
+	input.displayQ();
+	
+	BPath pathiii;
+	pathiii.SetTo("boot/system/MaK/neural/ai.txt");
+	//BFile file(path.Path(), B_READ_ONLY);
+	TextFile file("/boot/system/MaK/neural/ai.txt", B_READ_ONLY);
+	BString linedata = file.ReadLine();
+	debug_printf("linedata = %s \n", linedata.String());
+	//char buffer[100];
+	//ssize_t bytesRead = file.Read( buffer, sizeof(buffer));
+	
+	
+	debug_printf("Queue ended \n");
 
 	debug_printf("Making the cpp file {started}...\n");
 /*
@@ -601,7 +680,7 @@ BString	fCommand = "a.out";//"pwd"; //"/bin/bash -c ./a.out";
 
 
 	
-	// create listener port
+/*	// create listener port
 	fListenerPort = create_port(10, "kernel listener");
 	if (fListenerPort < 0)
 		return fListenerPort;
@@ -620,7 +699,7 @@ BString	fCommand = "a.out";//"pwd"; //"/bin/bash -c ./a.out";
 
 	// resume the listener
 	resume_thread(fListener);
-
+*/
 	return B_OK;
 }
 
@@ -636,6 +715,7 @@ NN::QuitRequested()
 status_t
 NN::_ListenerEntry(void *data)
 {
+debug_printf("NN:: _ListenerEntry \n");
 	return ((NN*)data)->_Listener();
 }
 
@@ -643,29 +723,40 @@ NN::_ListenerEntry(void *data)
 status_t
 NN::_Listener()
 {
+debug_printf("NN:: _Listener \n");
 	while (!fTerminating) {
+	debug_printf("NN:: _Listener fTerminating false \n");
 		// receive the next debug message
-//		DebugMessage *message = new DebugMessage;
-/*		int32 code;
+		DebugMessage *message = new DebugMessage;
+		int32 code;
+		//char data[100];
 		ssize_t bytesRead;
-		do {
-			bytesRead = read_port(fListenerPort, &code, &message->Data(),
-				sizeof(debug_debugger_message_data));
-		} while (bytesRead == B_INTERRUPTED);
+		char abc[100];
+		//do {
+		debug_printf("reading\n");
+			/*bytesRead = read_port(fListenerPort, &code, &message->Data(),
+				sizeof(debug_debugger_message_data));*/
+			bytesRead = read_port(fListenerPort, &code, &abc,
+				sizeof(abc));
+			//bytesRead = read_port(fListenerPort, &code, data,
+			//	sizeof(data));
+		//} while (bytesRead == B_INTERRUPTED);
+		//debug_printf("NN _Listener = %d\n",bytesRead);
 
 		if (bytesRead < 0) {
 			debug_printf("debug_server: Failed to read from listener port: "
 				"%s. Terminating!\n", strerror(bytesRead));
 			exit(1);
 		}
-TRACE(("debug_server: Got debug message: team: %" B_PRId32 ", code: %" B_PRId32
-	"\n", message->Data().origin.team, code));
+		debug_printf("code = %d\n", code);
+debug_printf("debug_server: Got debug message: team: %" B_PRId32 ", code: %" B_PRId32
+	 " %s\n", message->Data().origin.team, code, abc);
 
-		message->SetCode((debug_debugger_message)code);
+//		message->SetCode((debug_debugger_message)code);
 
 		// dispatch the message
-		NNHandlerRoster::Default()->DispatchMessage(message);
-*/	}
+	//	NNHandlerRoster::Default()->DispatchMessage(message);
+	}
 
 	return B_OK;
 }

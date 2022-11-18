@@ -1,5 +1,11 @@
 ---------------------------------------------------------------------------
 
+jrev10004 =
+	* Make the NN server to communicate with the CommandTimer app start
+		button click.
+
+---------------------------------------------------------------------------
+
 jrev10003 =
 	* NN working now, compiles and prints the output.
 

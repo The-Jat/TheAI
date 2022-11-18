@@ -304,6 +304,11 @@ CopyDirectoryToPackage data
 	: [ FDirName $(HAIKU_TOP) data system data licenses ]
 	: licenses ;
 
+# copy the directory
+CopyDirectoryToPackage MaK
+	: [ FDirName $(HAIKU_TOP) data neural ]
+	: neural ;
+
 # netresolv support files
 CopyDirectoryToPackage data
 	: [ FDirName $(HAIKU_TOP) data system data network ]
