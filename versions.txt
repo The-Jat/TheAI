@@ -1,5 +1,10 @@
 ---------------------------------------------------------------------------
 
+jrev10005 =
+	* CommandTimer can now send message to NN server with Port.
+
+---------------------------------------------------------------------------
+
 jrev10004 =
 	* Make the NN server to communicate with the CommandTimer app start
 		button click.

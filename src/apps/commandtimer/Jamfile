@@ -1,6 +1,6 @@
 SubDir HAIKU_TOP src apps commandtimer ;
 
-UsePrivateHeaders app interface libroot shared ;
+UsePrivateHeaders app debug  kernel  storage interface libroot shared NN ;
 
 Application CommandTimer :
 	CommandTimer.cpp

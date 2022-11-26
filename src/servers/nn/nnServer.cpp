@@ -43,6 +43,10 @@
 
 // command pipe include
 #include <private/shared/CommandPipe.h>
+
+// NN
+#include <NN.h>
+
 #include <msg.h>
 
 class DPath;
@@ -81,6 +85,7 @@ public:
 private:
 	static status_t _ListenerEntry(void *data);
 	status_t _Listener();
+	status_t GotMessage(Msg *message);
 
 //	void _DeleteNNHandler(NNHandler *handler);
 
@@ -455,7 +460,7 @@ NN::Init()
 	
 	debug_printf("NN::Init creating listener port\n");
 	// create listener port
-	fListenerPort = create_port(10, "neural listener");
+	fListenerPort = create_port(10, NN_PORT);
 	if (fListenerPort < 0)
 		return fListenerPort;
 
@@ -731,17 +736,21 @@ debug_printf("NN:: _Listener \n");
 		int32 code;
 		//char data[100];
 		ssize_t bytesRead;
-		char abc[100];
-		//do {
+		//char abc[200]; //working good
+		Msg *deta = new Msg();
+		do {
 		debug_printf("reading\n");
 			/*bytesRead = read_port(fListenerPort, &code, &message->Data(),
 				sizeof(debug_debugger_message_data));*/
-			bytesRead = read_port(fListenerPort, &code, &abc,
-				sizeof(abc));
+			//below is working good
+			//bytesRead = read_port(fListenerPort, &code, &abc,
+			//	sizeof(abc));
+			bytesRead = read_port(fListenerPort, &code, &deta->Data(),
+				sizeof(kile));
 			//bytesRead = read_port(fListenerPort, &code, data,
 			//	sizeof(data));
-		//} while (bytesRead == B_INTERRUPTED);
-		//debug_printf("NN _Listener = %d\n",bytesRead);
+		} while (bytesRead == B_INTERRUPTED);
+		debug_printf("NN _Listener = %ld\n",bytesRead);
 
 		if (bytesRead < 0) {
 			debug_printf("debug_server: Failed to read from listener port: "
@@ -749,16 +758,28 @@ debug_printf("NN:: _Listener \n");
 			exit(1);
 		}
 		debug_printf("code = %d\n", code);
-debug_printf("debug_server: Got debug message: team: %" B_PRId32 ", code: %" B_PRId32
-	 " %s\n", message->Data().origin.team, code, abc);
+/*debug_printf("debug_server: Got debug message: team: %" B_PRId32 ", code: %" B_PRId32
+	 " %s\n", message->Data().origin.team, code, abc);*/
+	 debug_printf("debug_server: Got debug message: team: %" B_PRId32 ", code: %" B_PRId32
+	 " %ld area_id = %d \n", message->Data().origin.team, code, deta->Data().size, deta->Data().areaID);
 
-//		message->SetCode((debug_debugger_message)code);
+		deta->SetCode((nn_msg)code);
 
 		// dispatch the message
-	//	NNHandlerRoster::Default()->DispatchMessage(message);
+		GotMessage(deta);
 	}
 
 	return B_OK;
+}
+
+
+status_t NN::GotMessage(Msg *message){
+
+	debug_printf("NN DispatchMessage \n");
+	debug_printf("size = %ld \n", message->Data().size);
+	
+	return B_OK;
+	
 }
 
 

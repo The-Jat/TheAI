@@ -22,6 +22,8 @@
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "TimerWindow"
 
+#include <NN.h>
+
 //#ifdef TRACE_DEBUG_SERVER
 //#	define TRACE(x) debug_printf x
 //#else
@@ -67,6 +69,13 @@ debug_printf("CommandTimerWindow {constructor} string is non ptr %s\n", argv);
 		"startStopButton", B_TRANSLATE("Start"), new BMessage('CLOK'));
 	startStopButton->SetEnabled(true);//false);
 	startStopButton->SetExplicitMaxSize(
+		BSize(B_SIZE_UNLIMITED, B_SIZE_UNLIMITED));
+	
+	// NN Button
+	nnButton = new BButton(
+		"nnButton", B_TRANSLATE("Call NN"), new BMessage('CLNN'));
+	nnButton->SetEnabled(true);//false);
+	nnButton->SetExplicitMaxSize(
 		BSize(B_SIZE_UNLIMITED, B_SIZE_UNLIMITED));
 	
 	/*BButton Communicate = new BButton(
@@ -129,7 +138,9 @@ debug_printf("CommandTimerWindow {constructor} string is non ptr %s\n", argv);
 				.Add(minsSpinner->CreateTextViewLayoutItem(), 1, 1)
 				.Add(secsSpinner->CreateLabelLayoutItem(), 0, 2)
 				.Add(secsSpinner->CreateTextViewLayoutItem(), 1, 2)
-				.Add(startStopButton, 3, 0, 1, 3)
+				.Add(startStopButton, 2, 0, 1, 3)
+				
+				.Add(nnButton, 3, 0, 1, 3)
 				.End()
 			.AddGlue()
 			.End()
@@ -218,6 +229,54 @@ if(ExecuteOrNot == true){
 			debug_printf("CommandTimerWindow:: MessageReceived DRCT\n");
 			executeCompileCommand();
 			break;
+		case 'CLNN':
+		{
+			debug_printf("NN clicked.");
+// works			int32 messageCode = 77;
+			//const void* message = "seven";
+			//char message[100] = {"seven"};
+			//BString message("Hello nn");
+// this works			const char* message = "eight";
+			//int32 messageSize = 8;
+			///port_id nnPort = find_port("neural listener");
+			port_id nnPort = find_port(NN_PORT);
+			//status_t result = write_port( nnPort, 0x7777, data, 20);
+			
+			
+			// create area
+			
+			char *address;
+			area_id area;
+			area = create_area("nn area", (void **) &address, B_ANY_ADDRESS,
+				B_PAGE_SIZE*10, B_NO_LOCK, B_READ_AREA | B_WRITE_AREA);
+			if (area < 0) {
+				debug_printf("CommandTimer Could not write area.\n");
+			}
+			
+			/*for (int i; i < B_PAGE_SIZE*5; i++) {
+				*address = system_time()%256;
+			}*/
+			strcpy(address, "Hey, look I just got allocated");
+			//the below statement code is working good.
+			//status_t result = write_port( nnPort, messageCode, message, sizeof(message));
+			//Data d1;
+			//d1.set("hi, you good!");
+			//BString d1 = "hi you good";
+			//int d1 = 100;
+			kile hectare;
+			hectare.areaID = area;
+			hectare.address = address;
+			hectare.size = B_PAGE_SIZE*10;
+			
+			
+			status_t result = write_port( nnPort, NN_INIT, &hectare, sizeof(hectare));
+			if(result == B_OK){
+				debug_printf("status_t = B_OK \n");
+			}else{
+				debug_printf("CommandTimerWindow = error writing to port.\n");
+			}
+			break;
+		}
 		case 'PULS':
 			doPulse();
 			break;
@@ -231,7 +290,8 @@ if(ExecuteOrNot == true){
 			debug_printf("received CLOK message \n");
 			int32 messageCode = 77;
 			//const void* message = "seven";
-			char message[100]={"seven"};
+			char message[100] = {"seven"};
+			//char message = "eight";
 			//int32 messageSize = 8;
 			port_id nnPort = find_port("neural listener");
 			//status_t result = write_port( nnPort, 0x7777, data, 20);

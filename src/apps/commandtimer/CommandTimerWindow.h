@@ -55,6 +55,7 @@ private:
 	bool 		path;
 
 	BButton* 	startStopButton;
+	BButton*	nnButton;
 	BButton*	chooseCommandButton;
 	BButton*	choosePathButton;
 	BCheckBox* 	repeatCheckBox;

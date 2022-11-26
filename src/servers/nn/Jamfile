@@ -6,6 +6,7 @@ UsePrivateHeaders debug ;
 UsePrivateHeaders kernel ;
 UsePrivateHeaders shared ;
 UsePrivateHeaders storage ;
+UsePrivateHeaders NN ;
 
 # UseHeaders [ FDirName $(HAIKU_TOP) headers beyond ] : true ;
 # UseHeaders [ FDirName $(HAIKU_TOP) headers functions ] : true ;
