@@ -778,6 +778,17 @@ status_t NN::GotMessage(Msg *message){
 	debug_printf("NN DispatchMessage \n");
 	debug_printf("size = %ld \n", message->Data().size);
 	
+	switch(message->Code()){
+		case NN_INIT:
+			debug_printf("NN NN_INIT\n");
+			
+		break;
+		default:
+			debug_printf("NN GotMessage default\n");
+		break;
+	}
+	
+	
 	return B_OK;
 	
 }

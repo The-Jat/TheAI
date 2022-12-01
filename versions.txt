@@ -1,5 +1,10 @@
 ---------------------------------------------------------------------------
 
+jrev10006 =
+	* Added the function to read the message by the code in the NN.
+
+---------------------------------------------------------------------------
+
 jrev10005 =
 	* CommandTimer can now send message to NN server with Port.
 
