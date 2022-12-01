@@ -65,6 +65,7 @@
 static const size_t kOptimalIOSize = 65536;
 static const bigtime_t kNotificationInterval = 1000000LL;
 
+
 // notify_if_stat_changed
 void
 notify_if_stat_changed(Volume *volume, Node *node)
@@ -118,13 +119,14 @@ ramfs_unmount(fs_volume* _volume)
 {
 	FUNCTION_START();
 	Volume* volume = (Volume*)_volume->private_volume;
-
-	status_t error = volume->Unmount();
-	if (error == B_OK)
-		delete volume;
-	if (error != B_OK)
-		REPORT_ERROR(error);
-	return error;
+	status_t error = B_OK;
+	if (volume->WriteLock()) {
+		error = volume->Unmount();
+		if (error == B_OK)
+			delete volume;
+	} else
+		SET_ERROR(error, B_ERROR);
+	RETURN_ERROR(error);
 }
 
 
@@ -155,7 +157,6 @@ ramfs_read_fs_info(fs_volume* _volume, struct fs_info *info)
 // ramfs_write_fs_info
 static status_t
 ramfs_write_fs_info(fs_volume* _volume, const struct fs_info *info, uint32 mask)
-
 {
 	FUNCTION_START();
 	Volume* volume = (Volume*)_volume->private_volume;
@@ -793,6 +794,9 @@ ramfs_create(fs_volume* _volume, fs_vnode* _dir, const char *name, int openMode,
 	// check directory
 	} else if (!dir) {
 		SET_ERROR(error, B_BAD_VALUE);
+	// check special names
+	} else if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) {
+		SET_ERROR(error, B_FILE_EXISTS);
 	} else if (VolumeWriteLocker locker = volume) {
 		NodeMTimeUpdater mTimeUpdater(dir);
 		// directory deleted?
@@ -1125,6 +1129,9 @@ ramfs_create_dir(fs_volume* _volume, fs_vnode* _dir, const char *name, int mode)
 	// check directory
 	} else if (!dir) {
 		SET_ERROR(error, B_BAD_VALUE);
+	// check special names
+	} else if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) {
+		SET_ERROR(error, B_FILE_EXISTS);
 	} else if (VolumeWriteLocker locker = volume) {
 		NodeMTimeUpdater mTimeUpdater(dir);
 		// directory deleted?
