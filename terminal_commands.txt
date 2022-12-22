@@ -1,0 +1,15 @@
+
+export PATH="/home/mak/OS/buildtools/jam/bin.linuxx86:$PATH"
+
+jam -q -j2 @nightly-anyboot
+
+
+git pull origin master --ff
+git fetch --all
+
+git status
+git add --all
+git commit -m "commit message"
+git log
+git tag -a jrev10006 fd45a31d050f350cf9f209036c507c7e1f14e222
+git push TheAI master
