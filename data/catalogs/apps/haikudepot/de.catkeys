@@ -1,4 +1,4 @@
-1	german	x-vnd.Haiku-HaikuDepot	136904009
+1	german	x-vnd.Haiku-HaikuDepot	4143471163
 Usage conditions download problem	ToLatestUserUsageConditionsWindow		Problem beim Herunterladen der Nutzungsbedingungen
 Available packages	MainWindow		Verfügbare Pakete
 It was not possible to create the new user.	UserLoginWindow		Das neue Benutzerkonto konnte nicht angelegt werden.
@@ -55,7 +55,6 @@ install package %s from repository %s\n	PackageResult	Don't change '%s' variable
 Package daemon problem	App		Problem mit Paket-Daemon
 No	MainWindow		Nein
 Repository	PackageListView		Paketquelle
-Users are required to be %AgeYears% years of age or older.	UserUsageConditions		Benutzer müssen mindestens %AgeYears% Jahre alt sein.
 Close	RatePackageWindow		Schließen
 Close	UserLoginWindow		Schließen
 The email is malformed.	UserLoginWindow		Das Format der E-Mail-Adresse ist inkorrekt.
@@ -167,6 +166,7 @@ Inactive	PackageListView		Deaktiviert
 Nickname:	UserLoginWindow		Benutzername:
 Synchronizing meta-data about repositories	ServerRepositoryDataUpdateProcess		Synchronisieren der Metadaten von Paketquellen
 OK	MainWindow		OK
+Users are required to be {0, plural, one{# year of age} other{# years of age}} or older.	UserUsageConditions		Benutzer müssen mindestens {0, plural, one{# Jahr} other{# Jahre}} oder älter sein.
 Version %Code%	UserUsageConditions		Version %Code%
 {0, plural, one{# item} other{# items}}	PackageListView		{0, plural, one{# Objekt} other{# Objekte}}
 Uninstalling \"%PackageName%\"	UninstallPackageAction		\"%PackageName%\" wird deinstalliert
