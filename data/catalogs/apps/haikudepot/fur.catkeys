@@ -1,4 +1,4 @@
-1	friulian	x-vnd.Haiku-HaikuDepot	136904009
+1	friulian	x-vnd.Haiku-HaikuDepot	4143471163
 Usage conditions download problem	ToLatestUserUsageConditionsWindow		Probleme tal discjamâ lis condizions di utilizazion
 Available packages	MainWindow		Pachets disponibii
 It was not possible to create the new user.	UserLoginWindow		Nol è stât pussibil creâ il gnûf utent.
@@ -55,7 +55,6 @@ install package %s from repository %s\n	PackageResult	Don't change '%s' variable
 Package daemon problem	App		Probleme cul demoni dai pachets
 No	MainWindow		No
 Repository	PackageListView		Dipuesit
-Users are required to be %AgeYears% years of age or older.	UserUsageConditions		Al è necessari che i utents a vedin %AgeYears% o plui agns.
 Close	RatePackageWindow		Siere
 Close	UserLoginWindow		Siere
 The email is malformed.	UserLoginWindow		La direzion e-mail e je malformade.
@@ -76,7 +75,7 @@ A password is required.	UserLoginWindow		E je necessarie une peraule d'ordin.
 Language	RatePackageWindow		Lenghe
 Status	PackageListView		Stât
 Network transport error	ServerHelper		Erôr di traspuart de rêt
-Cancel	PackageResult		Cancele
+Cancel	PackageResult		Anule
 Uninstall %PackageTitle%	PackageManager		Disinstale %PackageTitle%
 Retry	PackageProblem		Torne prove
 Update	RatePackageWindow		Inzorne
@@ -167,6 +166,7 @@ Inactive	PackageListView		Inatîf
 Nickname:	UserLoginWindow		Sorenon:
 Synchronizing meta-data about repositories	ServerRepositoryDataUpdateProcess		Sincronizazion meta-dâts in merit ai dipuesits
 OK	MainWindow		Va ben
+Users are required to be {0, plural, one{# year of age} other{# years of age}} or older.	UserUsageConditions		Al è necessari che i utents a vedin une etât di almancul {0, plural, one{# an} other{# agns}}.
 Version %Code%	UserUsageConditions		Version %Code%
 {0, plural, one{# item} other{# items}}	PackageListView		{0, plural, one{# item} other{# items}}
 Uninstalling \"%PackageName%\"	UninstallPackageAction		Disinstalazion di \"%PackageName%\"
