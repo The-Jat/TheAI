@@ -15,6 +15,10 @@
 #include <boot/stage2.h>
 #include <boot/platform.h>
 
+#include "JS/vid.h"
+#include "JS/fb.h"
+extern video_mode_t *current_video_mode;
+
 
 static const size_t kChunkSize = 16 * B_PAGE_SIZE;
 
@@ -467,3 +471,26 @@ kernel_args_free(void* block)
 	sLast = NULL;
 }
 
+
+extern "C"
+void do_video_assignment()
+{
+current_video_mode->mem_virt=gKernelArgs.frame_buffer.physical_buffer.start;
+current_video_mode->width = gKernelArgs.frame_buffer.width;
+current_video_mode->height = gKernelArgs.frame_buffer.height;
+current_video_mode->pitch = gKernelArgs.frame_buffer.bytes_per_row;
+current_video_mode->bpp = gKernelArgs.frame_buffer.depth;
+
+
+//dprintf("gKernelArgsmem_virt=%llu\n",gKernelArgs.frame_buffer.physical_buffer.start);
+dprintf("gKernelArgs.frame_buffer.width=%d\n",gKernelArgs.frame_buffer.width);
+dprintf("gKernelArgs.frame_buffer.height=%d\n",gKernelArgs.frame_buffer.height);
+//dprintf("gKernelArgs.frame_buffer.bytes_per_row=%du\n",gKernelArgs.frame_buffer.bytes_per_row);
+dprintf("gKernelArgs.frame_buffer.depth=%d\n",gKernelArgs.frame_buffer.depth);
+
+dprintf("mem_virt=%lu\n",current_video_mode->mem_virt);
+dprintf("width=%d\n",current_video_mode->width);
+dprintf("height=%d\n",current_video_mode->height);
+dprintf("pitch=%d\n",current_video_mode->pitch);
+dprintf("depth=%d\n",current_video_mode->bpp);
+}
