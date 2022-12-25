@@ -101,7 +101,6 @@ for platform in [ MultiBootSubDirSetup ] {
 			SubDirC++Flags -fno-rtti -include $(kernelC++Header) ;
 		}
 
-SEARCH_SOURCE += [ FDirName $(SUBDIR) JS ] ;
 
 		BootStaticLibrary [ MultiBootGristFiles boot_loader ] :
 			PathBlocklist.cpp
@@ -120,20 +119,6 @@ SEARCH_SOURCE += [ FDirName $(SUBDIR) JS ] ;
 			system_revision.c
 			vfs.cpp
 			vm.cpp
-
-# JS/allocator.c
-	# charset.c
-	console.c
-	fb.c
-	font_8x16.c
-	# line_editor.c
-	# #memory.c
-	# menu2.c
-	printf.c
-	# shell.c
-	string.c
-	# time.c
-	# ui.c
 
 			# libroot
 			driver_settings.cpp
