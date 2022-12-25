@@ -19,7 +19,7 @@
 #include <util/SplayTree.h>
 
 
-#define TRACE_HEAP
+//#define TRACE_HEAP
 #ifdef TRACE_HEAP
 #	define TRACE(format...)	dprintf(format)
 #else

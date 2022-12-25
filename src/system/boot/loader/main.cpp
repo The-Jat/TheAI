@@ -19,6 +19,7 @@
 
 #include "file_systems/packagefs/packagefs.h"
 
+#include "JS/fb.h"
 
 //#define TRACE_MAIN
 #ifdef TRACE_MAIN
@@ -160,6 +161,15 @@ main(stage2_args *args)
 			memcpy(buffer, gBootVolume.Buffer(), gBootVolume.ContentSize());
 			gKernelArgs.boot_volume = buffer;
 			gKernelArgs.boot_volume_size = gBootVolume.ContentSize();
+
+dprintf("before BOOT_JS_MENU...");
+if ((platform_boot_options() & BOOT_JS_MENU) != 0)
+{
+dprintf("BOOT_JS_MENU...");
+console_out_t* cou=fb_console_create();
+dprintf("cou->in_ui=%d\n",cou->in_ui);
+fb_console_init(cou);
+}
 
 			platform_cleanup_devices();
 			// TODO: cleanup, heap_release() etc.
