@@ -9,7 +9,7 @@
 
 #include "string.h"
 #include "utility.h"
-
+#include <boot/heap.h>
 
 
 //#include <assert.h>
@@ -20,7 +20,7 @@
 #include "vid.h"
 #include <stdlib.h>
 #include <boot/platform/generic/video.h>
-#include <boot/stdio.h>
+///#include <boot/stdio.h>
 #define PAGE_SIZE           0x1000          /**< Size of a page. */
 
 /*//#define TRACE_MAIN
@@ -78,6 +78,8 @@ static uint32_t fb_color_table[] = {
   [COLOR_YELLOW]        = 0xffff55,
   [COLOR_WHITE]         = 0xffffff,
 };
+
+size_t strlength(const char* str);
 
 /** Get the byte offset of a pixel.
  * @param x             X position of pixel.
@@ -505,6 +507,27 @@ static void fb_console_putc(console_out_t *console, char ch) {
   toggle_cursor(fb);
 }
 
+
+// get the size of given null terminated string.
+size_t strlength(const char* str){
+	size_t sz = 0;
+	while(*(str + sz)){
+		sz++;
+	}
+	
+	return sz;
+}
+
+/** Write a character to the console.
+ * @param console       Console output device.
+ * @param ch            Character to write. */
+static void fb_console_DrawString(console_out_t *console, const char* str) {
+  uint32_t strsz = strlength(str);
+  for(uint32_t i = 0; i<strsz; i++){
+	fb_console_putc(console, str[i]);  
+  }
+}
+
 /** Initialize the console.
  * @param console       Console output device. */
 /*static*/ void fb_console_init(console_out_t *console) {
@@ -526,16 +549,16 @@ do_video_assignment();
   fb->mapping = (uint8_t *)current_video_mode->mem_virt;
  
  uint32* start=(uint32*)fb->mapping;
- int i=0;
- while(i<50000)
+ unsigned int i=0;
+ while(i<current_video_mode->width * current_video_mode->height)
  {
- *start=0xffff0000;
+ *start=0xff00ff00;
  start++;
  i++;
  }
   
   //works good till here
- // while(1){}
+  //while(1){}
   
   
   fb->cols = current_video_mode->width / CONSOLE_FONT_WIDTH;
@@ -562,8 +585,10 @@ do_video_assignment();
 
   toggle_cursor(fb);
 
-fb_console_putc(console, 'K');
+//fb_console_putc(console, 'K');
 
+fb_console_DrawString(console, "hello world");
+while(1){}
 
 //while(1){}//infinite loop
 
