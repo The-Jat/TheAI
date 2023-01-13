@@ -19,7 +19,7 @@
 #include <util/SplayTree.h>
 
 
-#define TRACE_HEAP
+//#define TRACE_HEAP
 #ifdef TRACE_HEAP
 #	define TRACE(format...)	dprintf(format)
 #else
@@ -406,9 +406,6 @@ heap_init(stage2_args* args)
 	if (platform_init_heap(args, &base, &top) < B_OK)
 		return B_ERROR;
 
-TRACE("heap_init\n");
-TRACE("base = %p\n", (long int*)base);
-TRACE("top = %p\n", (long int*)top);
 	sHeapBase = base;
 	sHeapEnd = top;
 	sMaxHeapSize = (uint8*)top - (uint8*)base;
