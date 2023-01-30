@@ -1,0 +1,19 @@
+SubDir HAIKU_TOP src apps thebrain ;
+
+UsePrivateHeaders app debug  kernel  storage interface libroot shared NN ;
+
+Application TheBrain :
+	TheBrain.cpp
+	TheBrainApp.cpp
+	TheBrainWindow.cpp
+	: [ TargetLibstdc++ ] be localestub tracker
+	: TheBrain.rdef
+;
+
+DoCatalogs TheBrain :
+	x-vnd.jas.TheBrain
+	:
+	TheBrain.cpp
+	TheBrainApp.cpp
+	TheBrainWindow.cpp
+;

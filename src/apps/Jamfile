@@ -61,3 +61,4 @@ HaikuSubInclude tv ;
 HaikuSubInclude webpositive ;
 HaikuSubInclude workspaces ;
 HaikuSubInclude commandtimer ;
+HaikuSubInclude thebrain ;

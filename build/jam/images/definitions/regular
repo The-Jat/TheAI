@@ -23,6 +23,7 @@ SYSTEM_APPS += [ FFilterByBuildFeatures
 	ActivityMonitor AutoRaise
 	CodyCam
 	CommandTimer
+	TheBrain
 	GLInfo@mesa
 	HaikuDepot
 	Icon-O-Matic@expat Installer LaunchBox LegacyPackageInstaller
