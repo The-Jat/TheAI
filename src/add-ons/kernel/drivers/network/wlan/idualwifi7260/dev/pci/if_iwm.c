@@ -1,4 +1,4 @@
-/*	$OpenBSD: if_iwm.c,v 1.404 2022/08/29 17:59:12 stsp Exp $	*/
+/*	$OpenBSD: if_iwm.c,v 1.405 2022/12/16 13:49:35 stsp Exp $	*/
 
 /*
  * Copyright (c) 2014, 2016 genua gmbh <info@genua.de>
@@ -151,11 +151,9 @@
 
 #ifdef __FreeBSD_version
 #include <sys/device.h>
+#include <net/ifq.h>
 #define DEVNAME(_s) gDriverName
 #define SC_DEV_FOR_PCI sc->sc_dev
-#define ifq_is_oactive(IFQ) ((if_getdrvflags(ifp) & IFF_DRV_OACTIVE) != 0)
-#define ifq_set_oactive(IFQ) if_setdrvflagbits(ifp, IFF_DRV_OACTIVE, 0)
-#define ifq_clr_oactive(IFQ) if_setdrvflagbits(ifp, 0, IFF_DRV_OACTIVE)
 #else
 #define DEVNAME(_s)	((_s)->sc_dev.dv_xname)
 #endif
@@ -1237,17 +1235,6 @@ iwm_dma_contig_alloc(bus_dma_tag_t tag, struct iwm_dma_info *dma,
 	dma->tag = tag;
 	dma->size = size;
 
-#ifdef __FreeBSD_version
-	err = bus_dmamap_create_obsd(tag, size, 1, size, 0, alignment, BUS_DMA_NOWAIT,
-		&dma->map, 1);
-	if (err)
-		goto fail;
-
-	err = bus_dmamem_alloc(dma->map->_dmat, (void **)&dma->vaddr,
-		BUS_DMA_NOWAIT | BUS_DMA_ZERO | BUS_DMA_COHERENT, &dma->map->_dmamp);
-	if (err)
-		goto fail;
-#else
 	err = bus_dmamap_create(tag, size, 1, size, 0, BUS_DMA_NOWAIT,
 	    &dma->map);
 	if (err)
@@ -1263,7 +1250,6 @@ iwm_dma_contig_alloc(bus_dma_tag_t tag, struct iwm_dma_info *dma,
 	if (err)
 		goto fail;
 	dma->vaddr = va;
-#endif
 
 	err = bus_dmamap_load(tag, dma->map, dma->vaddr, size, NULL,
 	    BUS_DMA_NOWAIT);
@@ -1288,13 +1274,8 @@ iwm_dma_contig_free(struct iwm_dma_info *dma)
 			bus_dmamap_sync(dma->tag, dma->map, 0, dma->size,
 			    BUS_DMASYNC_POSTREAD | BUS_DMASYNC_POSTWRITE);
 			bus_dmamap_unload(dma->tag, dma->map);
-#ifdef __FreeBSD_version
-			bus_dmamem_free(dma->tag, dma->vaddr, dma->map->_dmamp);
-			dma->map->_dmamp = NULL;
-#else
 			bus_dmamem_unmap(dma->tag, dma->vaddr, dma->size);
 			bus_dmamem_free(dma->tag, &dma->seg, 1);
-#endif
 			dma->vaddr = NULL;
 		}
 		bus_dmamap_destroy(dma->tag, dma->map);
@@ -10397,9 +10378,6 @@ iwm_init(struct ifnet *ifp)
 
 	generation = ++sc->sc_generation;
 
-	KASSERT(sc->task_refs.r_refs == 0);
-	refcnt_init(&sc->task_refs);
-
 	err = iwm_preinit(sc);
 	if (err)
 		return err;
@@ -10413,7 +10391,7 @@ iwm_init(struct ifnet *ifp)
 	err = iwm_init_hw(sc);
 	if (err) {
 		if (generation == sc->sc_generation)
-			iwm_stop(ifp);
+			iwm_stop_device(sc);
 		return err;
 	}
 
@@ -10422,6 +10400,8 @@ iwm_init(struct ifnet *ifp)
 	if (sc->sc_nvm.sku_cap_11ac_enable)
 		iwm_setup_vht_rates(sc);
 
+	KASSERT(sc->task_refs.r_refs == 0);
+	refcnt_init(&sc->task_refs);
 	ifq_clr_oactive(&ifp->if_snd);
 	ifp->if_flags |= IFF_RUNNING;
 

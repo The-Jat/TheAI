@@ -1,4 +1,4 @@
-/*	$OpenBSD: if_iwx.c,v 1.150 2022/08/29 17:59:12 stsp Exp $	*/
+/*	$OpenBSD: if_iwx.c,v 1.153 2023/02/19 12:23:27 stsp Exp $	*/
 
 /*
  * Copyright (c) 2014, 2016 genua gmbh <info@genua.de>
@@ -135,11 +135,9 @@
 
 #ifdef __FreeBSD_version
 #include <sys/device.h>
+#include <net/ifq.h>
 #define DEVNAME(_s) gDriverName
 #define SC_DEV_FOR_PCI sc->sc_dev
-#define ifq_is_oactive(IFQ) ((if_getdrvflags(ifp) & IFF_DRV_OACTIVE) != 0)
-#define ifq_set_oactive(IFQ) if_setdrvflagbits(ifp, IFF_DRV_OACTIVE, 0)
-#define ifq_clr_oactive(IFQ) if_setdrvflagbits(ifp, 0, IFF_DRV_OACTIVE)
 #define mallocarray(nmemb, size, type, flags) malloc((size) * (nmemb), (type), (flags))
 #else
 #define DEVNAME(_s)	((_s)->sc_dev.dv_xname)
@@ -322,6 +320,7 @@ int	iwx_disable_txq(struct iwx_softc *sc, int, int, uint8_t);
 void	iwx_post_alive(struct iwx_softc *);
 int	iwx_schedule_session_protection(struct iwx_softc *, struct iwx_node *,
 	    uint32_t);
+void	iwx_unprotect_session(struct iwx_softc *, struct iwx_node *);
 void	iwx_init_channel_map(struct iwx_softc *, uint16_t *, uint32_t *, int);
 void	iwx_setup_ht_rates(struct iwx_softc *);
 void	iwx_setup_vht_rates(struct iwx_softc *);
@@ -1821,17 +1820,6 @@ iwx_dma_contig_alloc(bus_dma_tag_t tag, struct iwx_dma_info *dma,
 	dma->tag = tag;
 	dma->size = size;
 
-#ifdef __FreeBSD_version
-	err = bus_dmamap_create_obsd(tag, size, 1, size, 0, alignment, BUS_DMA_NOWAIT,
-		&dma->map, 1);
-	if (err)
-		goto fail;
-
-	err = bus_dmamem_alloc(dma->map->_dmat, (void **)&dma->vaddr,
-		BUS_DMA_NOWAIT | BUS_DMA_ZERO | BUS_DMA_COHERENT, &dma->map->_dmamp);
-	if (err)
-		goto fail;
-#else
 	err = bus_dmamap_create(tag, size, 1, size, 0, BUS_DMA_NOWAIT,
 	    &dma->map);
 	if (err)
@@ -1841,9 +1829,7 @@ iwx_dma_contig_alloc(bus_dma_tag_t tag, struct iwx_dma_info *dma,
 	    BUS_DMA_NOWAIT | BUS_DMA_ZERO);
 	if (err)
 		goto fail;
-#endif
 
-#ifndef __FreeBSD_version
 	if (nsegs > 1) {
 		err = ENOMEM;
 		goto fail;
@@ -1854,19 +1840,11 @@ iwx_dma_contig_alloc(bus_dma_tag_t tag, struct iwx_dma_info *dma,
 	if (err)
 		goto fail;
 	dma->vaddr = va;
-#endif
 
 	err = bus_dmamap_load(tag, dma->map, dma->vaddr, size, NULL,
 	    BUS_DMA_NOWAIT);
 	if (err)
 		goto fail;
-
-#ifdef __FreeBSD_version
-	if (dma->map->dm_nsegs > 1) {
-		err = ENOMEM;
-		goto fail;
-	}
-#endif
 
 	bus_dmamap_sync(tag, dma->map, 0, size, BUS_DMASYNC_PREWRITE);
 	dma->paddr = dma->map->dm_segs[0].ds_addr;
@@ -1885,13 +1863,8 @@ iwx_dma_contig_free(struct iwx_dma_info *dma)
 			bus_dmamap_sync(dma->tag, dma->map, 0, dma->size,
 			    BUS_DMASYNC_POSTREAD | BUS_DMASYNC_POSTWRITE);
 			bus_dmamap_unload(dma->tag, dma->map);
-#ifdef __FreeBSD_version
-			bus_dmamem_free(dma->tag, dma->vaddr, dma->map->_dmamp);
-			dma->map->_dmamp = NULL;
-#else
 			bus_dmamem_unmap(dma->tag, dma->vaddr, dma->size);
 			bus_dmamem_free(dma->tag, &dma->seg, 1);
-#endif
 			dma->vaddr = NULL;
 		}
 		bus_dmamap_destroy(dma->tag, dma->map);
@@ -2947,55 +2920,6 @@ iwx_post_alive(struct iwx_softc *sc)
 	iwx_ict_reset(sc);
 }
 
-/*
- * For the high priority TE use a time event type that has similar priority to
- * the FW's action scan priority.
- */
-#define IWX_ROC_TE_TYPE_NORMAL IWX_TE_P2P_DEVICE_DISCOVERABLE
-#define IWX_ROC_TE_TYPE_MGMT_TX IWX_TE_P2P_CLIENT_ASSOC
-
-int
-iwx_send_time_event_cmd(struct iwx_softc *sc,
-    const struct iwx_time_event_cmd *cmd)
-{
-	struct iwx_rx_packet *pkt;
-	struct iwx_time_event_resp *resp;
-	struct iwx_host_cmd hcmd = {
-		.id = IWX_TIME_EVENT_CMD,
-		.flags = IWX_CMD_WANT_RESP,
-		.resp_pkt_len = sizeof(*pkt) + sizeof(*resp),
-	};
-	uint32_t resp_len;
-	int err;
-
-	hcmd.data[0] = cmd;
-	hcmd.len[0] = sizeof(*cmd);
-	err = iwx_send_cmd(sc, &hcmd);
-	if (err)
-		return err;
-
-	pkt = hcmd.resp_pkt;
-	if (!pkt || (pkt->hdr.flags & IWX_CMD_FAILED_MSK)) {
-		err = EIO;
-		goto out;
-	}
-
-	resp_len = iwx_rx_packet_payload_len(pkt);
-	if (resp_len != sizeof(*resp)) {
-		err = EIO;
-		goto out;
-	}
-
-	resp = (void *)pkt->data;
-	if (le32toh(resp->status) == 0)
-		sc->sc_time_event_uid = le32toh(resp->unique_id);
-	else
-		err = EIO;
-out:
-	iwx_free_resp(sc, &hcmd);
-	return err;
-}
-
 int
 iwx_schedule_session_protection(struct iwx_softc *sc, struct iwx_node *in,
     uint32_t duration)
@@ -3008,9 +2932,34 @@ iwx_schedule_session_protection(struct iwx_softc *sc, struct iwx_node *in,
 		.duration_tu = htole32(duration * IEEE80211_DUR_TU),
 	};
 	uint32_t cmd_id;
+	int err;
 
 	cmd_id = iwx_cmd_id(IWX_SESSION_PROTECTION_CMD, IWX_MAC_CONF_GROUP, 0);
-	return iwx_send_cmd_pdu(sc, cmd_id, 0, sizeof(cmd), &cmd);
+	err = iwx_send_cmd_pdu(sc, cmd_id, 0, sizeof(cmd), &cmd);
+	if (!err)
+		sc->sc_flags |= IWX_FLAG_TE_ACTIVE;
+	return err;
+}
+
+void
+iwx_unprotect_session(struct iwx_softc *sc, struct iwx_node *in)
+{
+	struct iwx_session_prot_cmd cmd = {
+		.id_and_color = htole32(IWX_FW_CMD_ID_AND_COLOR(in->in_id,
+		    in->in_color)),
+		.action = htole32(IWX_FW_CTXT_ACTION_REMOVE),
+		.conf_id = htole32(IWX_SESSION_PROTECT_CONF_ASSOC),
+		.duration_tu = 0,
+	};
+	uint32_t cmd_id;
+
+	/* Do nothing if the time event has already ended. */
+	if ((sc->sc_flags & IWX_FLAG_TE_ACTIVE) == 0)
+		return;
+
+	cmd_id = iwx_cmd_id(IWX_SESSION_PROTECTION_CMD, IWX_MAC_CONF_GROUP, 0);
+	if (iwx_send_cmd_pdu(sc, cmd_id, 0, sizeof(cmd), &cmd) == 0)
+		sc->sc_flags &= ~IWX_FLAG_TE_ACTIVE;
 }
 
 /*
@@ -3470,6 +3419,8 @@ iwx_mac_ctxt_task(void *arg)
 	err = iwx_mac_ctxt_cmd(sc, in, IWX_FW_CTXT_ACTION_MODIFY, 1);
 	if (err)
 		printf("%s: failed to update MAC\n", DEVNAME(sc));
+
+	iwx_unprotect_session(sc, in);
 
 	refcnt_rele_wake(&sc->task_refs);
 	splx(s);
@@ -7886,6 +7837,8 @@ iwx_deauth(struct iwx_softc *sc)
 
 	splassert(IPL_NET);
 
+	iwx_unprotect_session(sc, in);
+
 	if (sc->sc_flags & IWX_FLAG_STA_ACTIVE) {
 		err = iwx_rm_sta(sc, in);
 		if (err)
@@ -8129,7 +8082,7 @@ iwx_set_key(struct ieee80211com *ic, struct ieee80211_node *ni,
 	if (k->k_cipher != IEEE80211_CIPHER_CCMP) {
 		/* Fallback to software crypto for other ciphers. */
 		err = ieee80211_set_key(ic, ni, k);
-		if (!err && (k->k_flags & IEEE80211_KEY_GROUP))
+		if (!err && in != NULL && (k->k_flags & IEEE80211_KEY_GROUP))
 			in->in_flags |= IWX_NODE_FLAG_HAVE_GROUP_KEY;
 		return err;
 	}
@@ -9716,8 +9669,21 @@ iwx_rx_pkt(struct iwx_softc *sc, struct iwx_rx_data *data, struct mbuf_list *ml)
 		}
 
 		case IWX_WIDE_ID(IWX_MAC_CONF_GROUP,
-		    IWX_SESSION_PROTECTION_NOTIF):
+		    IWX_SESSION_PROTECTION_NOTIF): {
+			struct iwx_session_prot_notif *notif;
+			uint32_t status, start, conf_id;
+
+			SYNC_RESP_STRUCT(notif, pkt);
+
+			status = le32toh(notif->status);
+			start = le32toh(notif->start);
+			conf_id = le32toh(notif->conf_id);
+			/* Check for end of successful PROTECT_CONF_ASSOC. */
+			if (status == 1 && start == 0 &&
+			    conf_id == IWX_SESSION_PROTECT_CONF_ASSOC)
+				sc->sc_flags &= ~IWX_FLAG_TE_ACTIVE;
 			break;
+		}
 
 		case IWX_WIDE_ID(IWX_SYSTEM_GROUP,
 		    IWX_FSEQ_VER_MISMATCH_NOTIFICATION):
@@ -11138,13 +11104,20 @@ iwx_wakeup(struct iwx_softc *sc)
 	struct ifnet *ifp = &sc->sc_ic.ic_if;
 	int err;
 
+	rw_enter_write(&sc->ioctl_rwl);
+
 	err = iwx_start_hw(sc);
-	if (err)
+	if (err) {
+		rw_exit(&sc->ioctl_rwl);
 		return err;
+	}
 
 	err = iwx_init_hw(sc);
-	if (err)
+	if (err) {
+		iwx_stop_device(sc);
+		rw_exit(&sc->ioctl_rwl);
 		return err;
+	}
 
 	refcnt_init(&sc->task_refs);
 	ifq_clr_oactive(&ifp->if_snd);
@@ -11155,6 +11128,7 @@ iwx_wakeup(struct iwx_softc *sc)
 	else
 		ieee80211_begin_scan(ifp);
 
+	rw_exit(&sc->ioctl_rwl);
 	return 0;
 }
 
