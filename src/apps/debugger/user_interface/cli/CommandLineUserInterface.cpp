@@ -20,6 +20,7 @@
 #include "CliContinueCommand.h"
 #include "CliDebugReportCommand.h"
 #include "CliDumpMemoryCommand.h"
+#include "CliDumpStringCommand.h"
 #include "CliPrintVariableCommand.h"
 #include "CliQuitCommand.h"
 #include "CliStackFrameCommand.h"
@@ -241,13 +242,6 @@ CommandLineUserInterface::Run()
 }
 
 
-/*static*/ status_t
-CommandLineUserInterface::_InputLoopEntry(void* data)
-{
-	return ((CommandLineUserInterface*)data)->_InputLoop();
-}
-
-
 status_t
 CommandLineUserInterface::_InputLoop()
 {
@@ -307,8 +301,14 @@ CommandLineUserInterface::_RegisterCommands()
 {
 	if (_RegisterCommand("bt sc", new(std::nothrow) CliStackTraceCommand)
 		&& _RegisterCommand("continue", new(std::nothrow) CliContinueCommand)
-		&& _RegisterCommand("db ds dw dl string", new(std::nothrow)
-			CliDumpMemoryCommand)
+		&& _RegisterCommand("db", new(std::nothrow)
+			CliDumpMemoryCommand(1, "byte", 16))
+		&& _RegisterCommand("ds", new(std::nothrow)
+			CliDumpMemoryCommand(2, "short", 8))
+		&& _RegisterCommand("dw", new(std::nothrow)
+			CliDumpMemoryCommand(4, "word", 4))
+		&& _RegisterCommand("dl", new(std::nothrow)
+			CliDumpMemoryCommand(8, "long", 2))
 		&& _RegisterCommand("frame", new(std::nothrow) CliStackFrameCommand)
 		&& _RegisterCommand("help", new(std::nothrow) HelpCommand(this))
 		&& _RegisterCommand("print", new(std::nothrow) CliPrintVariableCommand)
@@ -316,6 +316,8 @@ CommandLineUserInterface::_RegisterCommands()
 		&& _RegisterCommand("save-report",
 			new(std::nothrow) CliDebugReportCommand)
 		&& _RegisterCommand("stop", new(std::nothrow) CliStopCommand)
+		&& _RegisterCommand("string", new(std::nothrow)
+			CliDumpStringCommand())
 		&& _RegisterCommand("thread", new(std::nothrow) CliThreadCommand)
 		&& _RegisterCommand("threads", new(std::nothrow) CliThreadsCommand)
 		&& _RegisterCommand("variables",

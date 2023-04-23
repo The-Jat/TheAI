@@ -1,9 +1,9 @@
-1	czech	x-vnd.Haiku-MediaConverter	338319367
+1	czech	x-vnd.Haiku-MediaConverter	1833571229
 Input file not recognized as Audio or Video	MediaConverter		Vstupní soubor nebyl rozpoznán jako zvuk nebo obraz
 %u x %u, %.2ffps	MediaFileInfo	Width x Height, fps	%u x %u, %.2ffps
-Video quality: %3d%%	MediaConverter		Kvalita videa: %3d%%
 Source files	MediaConverter		Zdrojový soubor
 Error writing video frame %lld	MediaConverter		Chyba zápisu snímku videa %lld
+Audio quality: %s	MediaConverter		Kvalita zvuku: %s
 Error converting '%filename'	MediaConverter		Chyba převádění '%filename'
 Selected directory not found. Defaulting to /boot/home	MediaConverter		Vybraný adresář nebyl nalezen. Použije se výchozí /boot/home
 Conversion completed	MediaConverter		Převod dokončen
@@ -28,7 +28,6 @@ Encoder parameters	MediaConverter-EncoderWindow		Parametry Enkderu
 Open…	Menu		Otevřít...
 Audio encoding:	MediaConverter		Kódování zvuku:
 Multi-track file detected	MediaConverter		Zjištěn vícestopý soubor
-Audio quality: %3d%%	MediaConverter		Kvalita zvuku: %3d%%
 Cancelling…	MediaConverter		Rušení...
 Output file '%filename' created	MediaConverter		Byl vytvořen výstupní soubor '%filename'
 Output folder	MediaConverter		Výstupní adresář
@@ -41,6 +40,7 @@ Conversion cancelled	MediaConverter		Převod zrušen
 Low	MediaConverter		Nízký
 Error loading files	MediaConverter		Chyba otevírání souborů
 {0, plural, one{# bit} other{# bits}}	MediaFileInfo		{0, plural, one{# bit} few{# bity} other{# bitů}}
+Video quality: %s	MediaConverter		Kvalita videa: %s
 End   [ms]: 	MediaConverter		Konec [ms]: 
 Cancel	MediaConverter		Zrušit
 OK	MediaConverter-FileInfo		OK
@@ -50,16 +50,16 @@ Error	MediaConverter		Chyba
 File details	MediaConverter		Podrobnosti souboru
 No audio	Audio codecs list		Bez zvuku
 Drop media files onto this window	MediaConverter		Soubory médií přetáhni do tohoto okna
-Writing video track: %ld%% complete	MediaConverter		Zápis obrazové stopy: %ld%% hotovo
 {0, plural, one{# frame} other{# frames}}	MediaFileInfo		{0, plural, one{# snímek} few{# snímky} other{# snímků}}
 Error read audio frame %lld	MediaConverter		Chyba čtení zvukového snímku %lld
 Quit	Menu		Konec
 {0, plural, one{# byte} other{# bytes}}	MediaFileInfo		{0, plural, one{# bajt} other{# bajty} other{# bajtů}}
+Writing audio track: %s complete	MediaConverter		Zápis zvukové stopy: %s hotovo
 Duration:	MediaConverter-FileInfo		Tvání:
 MediaConverter	System name		Konvertor multimédií
+Writing video track: %s complete	MediaConverter		Zápis obrazové stopy: %s hotovo
 Error launching: %strError%	MediaConverter		Chyba otevírání: %strError%
 Error writing audio frame %lld	MediaConverter		Chyba při zápisu zvukového snímku %lld
-Writing audio track: %ld%% complete	MediaConverter		Zápis zvukové stopy: %ld%% hotovo
 File format:	MediaConverter		Formát souboru:
 File	Menu		Soubor
 Video quality not supported	MediaConverter		Nepodporovaná videokvalita
