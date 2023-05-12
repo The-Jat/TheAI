@@ -153,12 +153,12 @@ arch_int_init_post_vm(kernel_args *args)
 	arm_vector_init();
 
 	// see if high vectors are enabled
-	if ((mmu_read_c1() & (1 << 13)) != 0)
+	if ((arm_get_sctlr() & (1 << 13)) != 0)
 		dprintf("High vectors already enabled\n");
 	else {
-		mmu_write_c1(mmu_read_c1() | (1 << 13));
+		arm_set_sctlr(arm_get_sctlr() | (1 << 13));
 
-		if ((mmu_read_c1() & (1 << 13)) == 0)
+		if ((arm_get_sctlr() & (1 << 13)) == 0)
 			dprintf("Unable to enable high vectors!\n");
 		else
 			dprintf("Enabled high vectors\n");
@@ -356,6 +356,8 @@ arch_arm_page_fault(struct iframe *frame, addr_t far, uint32 fsr, bool isWrite, 
 			far);
 	} else if (!isExec && ((fsr & 0x060f) == FSR_FS_ALIGNMENT_FAULT)) {
 		panic("unhandled alignment exception\n");
+	} else if ((fsr & 0x060f) == FSR_FS_ACCESS_FLAG_FAULT) {
+		panic("unhandled access flag fault\n");
 	} else if ((frame->spsr & CPSR_I) != 0) {
 		// interrupts disabled
 

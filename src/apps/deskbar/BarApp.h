@@ -89,6 +89,7 @@ class PreferencesWindow;
 class TBarView;
 class TBarWindow;
 
+
 class BarTeamInfo {
 public:
 									BarTeamInfo(BList* teams, uint32 flags,
@@ -129,7 +130,7 @@ public:
 										BList*);
 	static	void					Unsubscribe(const BMessenger &subscriber);
 
-			int32					IconSize();
+			int32					TeamIconSize();
 
 private:
 			void					AddTeam(team_id team, uint32 flags,

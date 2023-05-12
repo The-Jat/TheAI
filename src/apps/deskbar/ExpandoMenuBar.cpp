@@ -826,13 +826,15 @@ TExpandoMenuBar::CheckItemSizes(int32 delta, bool reset)
 float
 TExpandoMenuBar::MinHorizontalItemWidth()
 {
-	const int32 iconSize = static_cast<TBarApp*>(be_app)->IconSize();
+	const int32 iconSize = static_cast<TBarApp*>(be_app)->TeamIconSize();
 	const float iconPadding = be_control_look->ComposeSpacing(kIconPadding);
 	float iconOnlyWidth = iconSize + iconPadding;
+	const int32 min = be_control_look->ComposeIconSize(kMinimumIconSize)
+		.IntegerWidth() + 1;
 
 	return static_cast<TBarApp*>(be_app)->Settings()->hideLabels
 		? iconOnlyWidth
-		: (iconSize - kMinimumIconSize) + gMinimumWindowWidth
+		: (iconSize - min) + gMinimumWindowWidth
 			+ (be_plain_font->Size() - 12) * 4;
 }
 
@@ -840,7 +842,7 @@ TExpandoMenuBar::MinHorizontalItemWidth()
 float
 TExpandoMenuBar::MaxHorizontalItemWidth()
 {
-	const int32 iconSize = static_cast<TBarApp*>(be_app)->IconSize();
+	const int32 iconSize = static_cast<TBarApp*>(be_app)->TeamIconSize();
 	const float iconPadding = be_control_look->ComposeSpacing(kIconPadding);
 	float iconOnlyWidth = iconSize + iconPadding;
 

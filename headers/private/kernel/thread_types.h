@@ -487,8 +487,6 @@ struct Thread : TeamThreadIteratorEntry<thread_id>, KernelReferenceable {
 		timer		unblock_timer;		// timer for block with timeout
 	} wait;
 
-	struct PrivateConditionVariableEntry *condition_variable_entry;
-
 	struct {
 		sem_id		write_sem;	// acquired by writers before writing
 		sem_id		read_sem;	// release by writers after writing, acquired
@@ -640,8 +638,7 @@ private:
 
 struct ProcessSession : BReferenceable {
 	pid_t				id;
-	int32				controlling_tty;	// index of the controlling tty,
-											// -1 if none
+	void*				controlling_tty;
 	pid_t				foreground_group;
 
 public:

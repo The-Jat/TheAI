@@ -50,9 +50,9 @@ All rights reserved.
 #include <File.h>
 #include <FindDirectory.h>
 #include <Locale.h>
-#include <Mime.h>
 #include <Message.h>
 #include <Messenger.h>
+#include <Mime.h>
 #include <Path.h>
 #include <Roster.h>
 
@@ -757,7 +757,7 @@ TBarApp::Subscribe(const BMessenger &subscriber, BList* list)
 	int32 numTeams = sBarTeamInfoList.CountItems();
 	for (int32 i = 0; i < numTeams; i++) {
 		BarTeamInfo* barInfo = (BarTeamInfo*)sBarTeamInfoList.ItemAt(i);
-		BarTeamInfo* newBarInfo = new (std::nothrow) BarTeamInfo(*barInfo);
+		BarTeamInfo* newBarInfo = new(std::nothrow) BarTeamInfo(*barInfo);
 		if (newBarInfo != NULL)
 			list->AddItem(newBarInfo);
 	}
@@ -919,7 +919,7 @@ TBarApp::ResizeTeamIcons()
 
 
 int32
-TBarApp::IconSize()
+TBarApp::TeamIconSize()
 {
 	static int32 iconSize = 0, composedIconSize = 0;
 	if (iconSize != fSettings.iconSize) {
@@ -966,7 +966,7 @@ TBarApp::QuitPreferencesWindow()
 void
 TBarApp::FetchAppIcon(BarTeamInfo* barInfo)
 {
-	const int32 width = IconSize();
+	const int32 width = TeamIconSize();
 	const int32 index = (fSettings.iconSize - kMinimumIconSize) / kIconSizeInterval;
 
 	// first look in the icon cache
@@ -1024,12 +1024,12 @@ TBarApp::FetchAppIcon(BarTeamInfo* barInfo)
 BRect
 TBarApp::IconRect()
 {
-	int32 iconSize = IconSize();
+	int32 iconSize = TeamIconSize();
 	return BRect(0, 0, iconSize - 1, iconSize - 1);
 }
 
 
-//	#pragma mark -
+//	#pragma mark - BarTeamInfo
 
 
 BarTeamInfo::BarTeamInfo(BList* teams, uint32 flags, char* sig, BBitmap* icon,

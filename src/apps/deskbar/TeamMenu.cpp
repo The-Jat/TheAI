@@ -91,8 +91,15 @@ TTeamMenu::AttachedToWindow()
 
 	bool dragging = fBarView != NULL && fBarView->Dragging();
 	desk_settings* settings = static_cast<TBarApp*>(be_app)->Settings();
-	int32 iconSize = static_cast<TBarApp*>(be_app)->IconSize();
-	float iconOnlyWidth = iconSize + be_control_look->ComposeSpacing(kIconPadding);
+	const int32 iconSize = static_cast<TBarApp*>(be_app)->TeamIconSize();
+	const float iconPadding = be_control_look->ComposeSpacing(kIconPadding);
+	float iconOnlyWidth = iconSize + iconPadding;
+	if (settings->hideLabels)
+		iconOnlyWidth += iconPadding; // add an extra icon padding
+	const int32 large = be_control_look->ComposeIconSize(B_LARGE_ICON)
+		.IntegerWidth() + 1;
+	const int32 min = be_control_look->ComposeIconSize(kMinimumIconSize)
+		.IntegerWidth() + 1;
 
 	// calculate the minimum item width based on font and icon size
 	float minItemWidth = 0;
@@ -102,23 +109,23 @@ TTeamMenu::AttachedToWindow()
 	} else {
 		float labelWidth = gMinimumWindowWidth - iconOnlyWidth
 			+ (be_plain_font->Size() - 12) * 4;
-		if (iconSize <= B_LARGE_ICON) // label wraps after 32x32
-			labelWidth += iconSize - kMinimumIconSize;
+		if (iconSize <= large) // label wraps after 32x32
+			labelWidth += iconSize - min;
 		minItemWidth = iconOnlyWidth + labelWidth;
 	}
 
 	float maxItemWidth = minItemWidth;
 
-	int32 itemCount = teamList.CountItems();
+	int32 teamCount = teamList.CountItems();
 	if (!settings->hideLabels) {
 		// go through list and find the widest label
-		for (int32 i = 0; i < itemCount; i++) {
+		for (int32 i = 0; i < teamCount; i++) {
 			BarTeamInfo* barInfo = (BarTeamInfo*)teamList.ItemAt(i);
 			float labelWidth = StringWidth(barInfo->name);
 			// label wraps after 32x32
-			float itemWidth = iconSize > B_LARGE_ICON
+			float itemWidth = iconSize > large
 				? std::max(labelWidth, iconOnlyWidth)
-				: labelWidth + iconOnlyWidth + kMinimumIconSize
+				: labelWidth + iconOnlyWidth + min
 					+ (be_plain_font->Size() - 12) * 4;
 			maxItemWidth = std::max(maxItemWidth, itemWidth);
 		}
@@ -133,7 +140,7 @@ TTeamMenu::AttachedToWindow()
 		teamList.SortItems(TTeamMenu::CompareByName);
 
 	// go through list and add the items
-	for (int32 i = 0; i < itemCount; i++) {
+	for (int32 i = 0; i < teamCount; i++) {
 		// add items back
 		BarTeamInfo* barInfo = (BarTeamInfo*)teamList.ItemAt(i);
 		TTeamMenuItem* item = new TTeamMenuItem(barInfo->teams,
